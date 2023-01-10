@@ -1,0 +1,10 @@
+archive
+_pycache__
+*.csv
+*.dat
+*.pickle
+!SIGNAL_INFO_OCT_2022.csv
+!MAPPINGS_DET_INFO_OCT_2022.csv
+Orlando/
+Orlando_converted/
+Orlando_converted_bit_mask/
