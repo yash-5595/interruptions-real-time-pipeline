@@ -85,8 +85,8 @@ class LabelEOI():
     
     def return_hist_df(self):
         # current data
-        # count_df = return_det_counts_data(self.detector_id , self.start_time, self.end_time)
-        count_df = return_det_counts_data_v2(self.detector_id , self.start_time, self.end_time)
+        count_df = return_det_counts_data(self.detector_id , self.start_time, self.end_time)
+        # count_df = return_det_counts_data_v2(self.detector_id , self.start_time, self.end_time)
 #         count_df.rename(columns={'EventCode': 'Count_curr'}, inplace=True)
 
         count_df.rename(columns={'COUNT': 'Count'}, inplace=True)

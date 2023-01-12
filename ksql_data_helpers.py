@@ -91,7 +91,7 @@ def return_det_counts_data(detector_id, time_start, time_end):
     start_time: unix time in ms (INT)
     end_time: unix time in ms(INT)
     '''
-    TABLE_NAME = 'COUNTS_RAW_STREAM_V2_AGG_5SEC' #Detector ID to counts  #THIS IS A TABLE
+    TABLE_NAME = 'COUNTS_RAW_STREAM_V1_AGG_5SEC' #Detector ID to counts  #THIS IS A TABLE
     ksql_string = f'SELECT * FROM {TABLE_NAME} where DETECTORID = ' +  "'" + detector_id + "'"   + f' AND WINDOWSTART>={time_start} AND WINDOWSTART < {time_end}'
     print(ksql_string)
     temp_df = return_query_df(ksql_string)
