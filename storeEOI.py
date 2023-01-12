@@ -22,8 +22,8 @@ class IscEoiStore():
         self.isc_last_processed = {}
         self.map_file = pd.read_csv('MAPPINGS_DET_INFO_OCT_2022.csv')
         self.reduction_threshold = 0.01
-        self.volume_threshold = 1
-        self.no_of_cores = 30
+        self.volume_threshold = 30
+        self.no_of_cores = 10
         
     def process_logic(self,signalid, window_end):
         if(signalid not in self.isc_last_processed):
@@ -37,6 +37,8 @@ class IscEoiStore():
         df = return_recent_data_ts(look_back_time = 15)
         
         df_filtered = df[df.SUMFLAG==25].copy()
+        if(df_filtered.shape[0]==0):
+            return None
         df_filtered['processed'] = df_filtered.apply(lambda x : self.process_logic(x.SIGNALID, x.WINDOWEND), axis =1 )
         df_filtered = df_filtered[df_filtered['processed']==1]
         df_filtered = df_filtered.drop_duplicates(['SIGNALID'], keep='first')
@@ -73,6 +75,9 @@ class IscEoiStore():
     def start_processing(self):
 #         get current data
         df_recent = self.get_recent_status()
+        if(df_recent is None):
+            print(f"WAITING FOR ENOUGH DATA")
+            return []
         print(df_recent)
 #     filter if next timestamp is available
         all_rows = []
@@ -88,8 +93,8 @@ class IscEoiStore():
                     self.isc_last_processed[each_row.SIGNALID] = each_row.WINDOWEND
 #         return all_rows
 #     parallel process all rows
-        print(f"allrows")
-        print(all_rows)
+        # print(f"allrows")
+        # print(all_rows)
         p = mp.Pool(self.no_of_cores)
         results = p.map(self.process_single_isc, all_rows)
         p.close()

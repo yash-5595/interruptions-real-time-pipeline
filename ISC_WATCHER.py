@@ -14,6 +14,8 @@ import glob
 from ISC_PRODUCER import MessageProducer
 from multiprocessing import Process
 from datetime import date
+from config import corridor_isc_map
+
 
 class Watcher:
 
@@ -131,13 +133,16 @@ class ISChandler(FileSystemEventHandler):
         self.root = 'Orlando_converted'
         self.decoder_path = 'PurdueDecoder.exe'
         self.all_isc_dict = {}
+        self.all_isc = set()
+        for each_corridor, isc_list in corridor_isc_map.items():
+            self.all_isc.update(isc_list)
         
     def on_created(self, event):
         print(event.is_directory)
         if(event.is_directory):
             isc_path = event.src_path
             isc_id = event.src_path.split('/')[-1]
-            if(isc_id not in self.all_isc_dict):
+            if((isc_id not in self.all_isc_dict) and (isc_id in self.all_isc)):
                 print(f"start monitoring {isc_id} at path {isc_path}")
                 print(event) # Your code here
                 p = Process(target=self.start_process, args=(isc_path,isc_id))
@@ -153,7 +158,9 @@ class ISChandler(FileSystemEventHandler):
     def initial_init(self, path_to):
         print(f"Yash: DOING THE INITIAL INIT **** ")
         all_isc_folders = glob.glob(f"{path_to}/*")
-        for each_folder in all_isc_folders[:5]:
+
+        all_isc_inclusive = [x for x in all_isc_folders if x.split('/')[-1] in self.all_isc]
+        for each_folder in all_isc_inclusive:
             isc_id = each_folder.split('/')[-1]
             print(f"INTIAL INIT for SignalID {isc_id}")
             p = Process(target=self.start_process, args=(each_folder,isc_id))

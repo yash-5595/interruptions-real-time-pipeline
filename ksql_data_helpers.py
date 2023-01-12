@@ -91,9 +91,9 @@ def return_det_counts_data(detector_id, time_start, time_end):
     start_time: unix time in ms (INT)
     end_time: unix time in ms(INT)
     '''
-    TABLE_NAME = 'COUNTS_RAW_STREAM_V1_AGG_5SEC' #Detector ID to counts  #THIS IS A TABLE
+    TABLE_NAME = 'COUNTS_RAW_STREAM_V2_AGG_5SEC' #Detector ID to counts  #THIS IS A TABLE
     ksql_string = f'SELECT * FROM {TABLE_NAME} where DETECTORID = ' +  "'" + detector_id + "'"   + f' AND WINDOWSTART>={time_start} AND WINDOWSTART < {time_end}'
-    # print(ksql_string)
+    print(ksql_string)
     temp_df = return_query_df(ksql_string)
     
     temp_df.drop(columns = ['DETECTORID', 'WINDOWEND'], inplace = True)
@@ -112,3 +112,31 @@ def return_det_counts_data(detector_id, time_start, time_end):
     return final_df
 
 
+
+def return_det_counts_data_v2(detector_id, time_start, time_end):
+    '''
+    detector_id: detector_id string (signalID + channel value)
+    start_time: unix time in ms (INT)
+    end_time: unix time in ms(INT)
+    '''
+    TABLE_NAME = 'COUNTS_RAW_STREAM_V1' #Detector ID to counts  #THIS IS A TABLE
+    ksql_string = f'SELECT * FROM {TABLE_NAME} where DETECTORID = ' +  "'" + detector_id + "'"   + f' AND TS>={time_start} AND TS < {time_end}'
+    print(ksql_string)
+    temp_df = return_query_df(ksql_string)
+    temp_df.drop(columns = ['DETECTORID', 'SIGNALID'], inplace = True)
+    temp_df['EVENTCODE'].replace([82], 1, inplace  = True)
+    temp_df.rename(columns={'EVENTCODE': 'COUNT'},inplace  = True)
+    
+    
+    new_row = pd.Series(data={'TS':time_start,'COUNT':0}, name=0)
+    temp_df = temp_df.append(new_row, ignore_index=False)
+    new_row = pd.Series(data={'TS':time_end,'COUNT':0}, name=0)
+    temp_df = temp_df.append(new_row, ignore_index=False)
+    temp_df['timestamp']  = pd.to_datetime(temp_df['TS'], unit = 'ms').dt.tz_localize('UTC').dt.tz_convert('US/Eastern')
+    temp_df.set_index('timestamp', inplace = True)
+    temp_df.drop(columns = ['TS'], inplace = True)
+    temp_df.sort_index(inplace = True)
+    
+    final_df = temp_df.resample('5s').sum()
+    
+    return final_df

@@ -13,7 +13,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 import multiprocessing as mp
 
-from ksql_data_helpers import return_det_counts_data, return_recent_data_ts,ts_str_to_unix, ts_unix_to_ts
+from ksql_data_helpers import return_det_counts_data, return_recent_data_ts,ts_str_to_unix, ts_unix_to_ts, return_det_counts_data_v2
 from helpers import return_det_waveform
 
 class LabelEOI():
@@ -72,7 +72,9 @@ class LabelEOI():
             curr_vol = last_row.Count
             curr_ma = last_row.MA_curr
             reduction =  (last_row.baseline- curr_vol)/(last_row.baseline)
-            reducton_dict = {'detector_id':self.detector_id, 'start_time': ts_unix_to_ts(self.start_time),'end_time':ts_unix_to_ts(self.end_time), 'curr_volume':curr_vol, 'curr_ma':curr_ma,'baseline':last_row.baseline, 'reduction':reduction}
+            end_time_str = pd.to_datetime(ts_unix_to_ts(self.end_time)).strftime("%Y-%m-%d %H:%M:%S")
+            start_time_str = (pd.to_datetime(ts_unix_to_ts(self.end_time)) - pd.Timedelta(seconds=300)).strftime("%Y-%m-%d %H:%M:%S")
+            reducton_dict = {'detector_id':self.detector_id, 'start_time':start_time_str, 'end_time':end_time_str, 'curr_volume':curr_vol, 'curr_ma':curr_ma,'baseline':last_row.baseline, 'reduction':reduction}
             if(reduction>0):
                 return True, reducton_dict
             else:
@@ -83,7 +85,8 @@ class LabelEOI():
     
     def return_hist_df(self):
         # current data
-        count_df = return_det_counts_data(self.detector_id , self.start_time, self.end_time)
+        # count_df = return_det_counts_data(self.detector_id , self.start_time, self.end_time)
+        count_df = return_det_counts_data_v2(self.detector_id , self.start_time, self.end_time)
 #         count_df.rename(columns={'EventCode': 'Count_curr'}, inplace=True)
 
         count_df.rename(columns={'COUNT': 'Count'}, inplace=True)

@@ -3,13 +3,13 @@
 #docker execute command 
 
 #cd back back
-store_path=/home/yash/interruptions/real_time_pipeline/Orlando_converted_raw_data/2022/12
-mainDir=Orlando_converted_raw_data/2022/12
+store_path=/home/yash/interruptions/real_time_pipeline/Orlando_converted_raw_data/2023/01
+mainDir=Orlando_converted_raw_data/2023/01
 subs=`ls $mainDir`
 
 for each_day in $subs; do
     #echo $each_day
-    if (($each_day > 15));then
+    if (($each_day > 01));then
 	    echo $each_day
 	
     # cd $each_day
