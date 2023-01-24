@@ -1,0 +1,16 @@
+global:
+  max_syncs_per_minute: 1000
+  report_stats: True
+watcher:
+  include_patterns: 
+  exclude_patterns: ["*.git/*"]
+  exclude_directories: False
+  case_sensitive: False
+s3:
+  max_concurrent_requests: 40
+  max_queue_size: 8000
+  multipart_threshold: 32MB
+  multipart_chunksize: 32MB
+  max_bandwidth: 
+  use_accelerate_endpoint: "false"
+  region: us-east-1
